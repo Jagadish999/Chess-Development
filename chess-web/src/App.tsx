@@ -1,11 +1,11 @@
 import React from 'react';
-import './App.css';
+
+import MainRoute from './MainConponents/MainRoute';
 
 function App() {
+
   return (
-    <h1 className='text-5xl font-bold underline'>
-      Hello World
-    </h1>
+    <MainRoute></MainRoute>
   );
 }
 
