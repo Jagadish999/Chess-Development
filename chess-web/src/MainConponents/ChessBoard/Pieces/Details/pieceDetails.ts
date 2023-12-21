@@ -1,23 +1,62 @@
-import { PieceDetail } from "./pieceTypes";
+import { chessBoard, chessBoardExtended } from "./constants";
+import { PieceDetails, PieceDetail } from "./pieceTypes";
 
-//Finds current sq, 
-export function pieceDetails(pieceFenPos: string){
+export function pieceDetails(pieceFenPos: string) {
 
-    const posArr = pieceFenPos.split("/").reverse();
-    const pieceDetail: PieceDetail[] = [];
+    const piecesInfoInFen = pieceFenPos.split(" ")[0];
 
-    for(let rank = 0; rank < posArr.length; rank++){
-        for(let file = 0; file < posArr[rank].length; file++){
+    const pieceDetail: PieceDetail[] = pieceFileAndRanks(piecesInfoInFen);
 
-            if(!isNaN(parseInt(posArr[rank][file]))){
-                file += parseInt(posArr[rank][file]);
+    const bla = fillChessBoardArray(piecesInfoInFen);
+
+    return pieceDetail;
+}
+
+
+function fillChessBoardArray(pieceInfo: string) {
+
+    const chessBoardPieces: number[] | string[] = [...chessBoard];
+
+    //piecesInRanks has piece details from rank 1 to rank 8
+    const piecesInRanks = pieceInfo.split("/").reverse();
+    
+    //Fill chessBoardPieces array with pieces available in FEN position
+    let counter = 0;
+    for(let RANK = 0; RANK < 8; RANK++){
+        for(let FILE = 0; FILE < 8; FILE++){
+            if (!isNaN(parseInt(piecesInRanks[RANK][FILE]))) {
+                counter += parseInt(piecesInRanks[RANK][FILE]);
+                FILE += parseInt(piecesInRanks[RANK][FILE]);
             }
-            else{
-                const color = posArr[rank][file].toUpperCase() === posArr[rank][file] ? "w" : "b";
-                pieceDetail.push({pieceName:posArr[rank][file], file: file + 1, rank: rank + 1, color: color});
+            else {
+                chessBoardPieces[counter] = piecesInRanks[RANK][FILE];
+                counter++;
             }
         }
     }
 
-    return pieceDetail;
+    console.log(chessBoardPieces);
+}
+
+
+
+//Adding files and ranks of each pieces
+function pieceFileAndRanks(initialPiecesCollection: string): PieceDetail[] {
+
+    const posArr = initialPiecesCollection.split("/").reverse();
+    let tempPieceDetails: PieceDetail[] = [];
+
+    for (let rank = 0; rank < posArr.length; rank++) {
+        for (let file = 0; file < posArr[rank].length; file++) {
+
+            if (!isNaN(parseInt(posArr[rank][file]))) {
+                file += parseInt(posArr[rank][file]);
+            }
+            else {
+                const color = posArr[rank][file].toUpperCase() === posArr[rank][file] ? "w" : "b";
+                tempPieceDetails.push({ pieceName: posArr[rank][file], file: file + 1, rank: rank + 1, color: color });
+            }
+        }
+    }
+    return tempPieceDetails;
 }
