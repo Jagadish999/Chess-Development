@@ -1,8 +1,8 @@
 
 import { useState } from "react";
-import { PieceDetail } from "./Details/pieceTypes";
+import { PieceDetails } from "./Details/pieceTypes";
 
-export default function Piece(props: { details: PieceDetail }) {
+export default function Piece(props: { details: PieceDetails }) {
 
     const pieceDetail = props.details;
 
