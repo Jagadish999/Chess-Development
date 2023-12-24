@@ -1,9 +1,9 @@
-import { PieceDetails } from "./pieceTypes";
+import { PieceDetails, Move } from "./pieceTypes";
 
 /*
 Takes chessBoardExtended as parameter and returns all the unfiltered moves
 */
-export function calculateRawMove(chessBoardExtended: number[] | string[]){
+export function calculateRawMove(chessBoardExtended: number[] | string[], unphasantMove: string){
 
     const temppPieceDetails: PieceDetails[] = [];
     
@@ -12,7 +12,13 @@ export function calculateRawMove(chessBoardExtended: number[] | string[]){
         if(chessBoardExtended[boardIndex] === 0 || chessBoardExtended[boardIndex] === 1) continue;
 
        //Receives only index with string here
+        const currentPiece = chessBoardExtended[boardIndex];
 
+        if(currentPiece === 'p') blackPawnMovement();
+        else if(currentPiece === 'P') whitePawnMovement();
+        else if(currentPiece === 'n' || currentPiece === 'N') nightMovement();
+        else if(currentPiece === 'k' || currentPiece === 'K') kingMovement();
+        else if(currentPiece === 'q' || currentPiece === 'Q' || currentPiece === 'r' || currentPiece === 'R' || currentPiece === 'b' || currentPiece === 'B') rookBishopQueenMovement();
     }
     
     return temppPieceDetails;
@@ -30,6 +36,27 @@ export function calculateMove(pieceName: string, pieceIndex: number, chessBoardE
     //pawn movement exception
 
     if(pieceName === 'p'){}
+}
+
+function whitePawnMovement(){
+
+}
+
+function blackPawnMovement(){
+
+}
+
+function kingMovement(){
+
+}
+
+
+function rookBishopQueenMovement(){
+
+}
+
+function nightMovement(){
+
 }
 /*
 Accepts: first part of FEN position

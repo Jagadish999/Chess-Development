@@ -3,13 +3,13 @@ export type PieceDetails = {
     file: number;
     pieceName: string;
     color: string;
-    move: Move[];
+    linearMove: Move[];
     capture: Move[];
     unphasant: Move[];
     castle: Move[];
 }
 
-type Move = {
+export type Move = {
     
     file: number,
     rank: number

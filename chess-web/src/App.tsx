@@ -1,6 +1,6 @@
 import React from 'react';
 
-import MainRoute from './MainConponents/MainRoute';
+import MainRoute from './Route/MainRoute';
 
 function App() {
 

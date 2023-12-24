@@ -1,14 +1,15 @@
-import Play from './Navigation/play/Play';
+import RootNavigation from './RootNavigation';
+import ErrorPage from '../ErrorPage';
+
+import Play from '../FrontEndComponents/Play/Play';
+import OnlineMatch from '../FrontEndComponents/Online/OnlineMatch';
+import EngineMatch from '../FrontEndComponents/Engine/EngineMatch';
+import Puzzle from '../FrontEndComponents/Puzzle/Puzzle';
 
 import {
     createBrowserRouter,
     RouterProvider,
   } from "react-router-dom";
-
-import RootNavigation from './RootNavigation';
-import ErrorPage from './ErrorPage';
-import OnlineMatch from './Navigation/play/online/OnlineMatch';
-import EngineMatch from './Navigation/play/engine/EngineMatch';
 
 export default function MainRoute(){
 
@@ -44,7 +45,7 @@ export default function MainRoute(){
           },
           {
             path: "puzzle",
-            element: <h1>Puzzle</h1>
+            element: <Puzzle></Puzzle>
           },
           {
             path: "logout",
@@ -55,5 +56,4 @@ export default function MainRoute(){
     ]);
 
     return <RouterProvider router={router} />;
-
 }

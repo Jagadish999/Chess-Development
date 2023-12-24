@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PieceDetails } from "./Details/pieceTypes";
+import { PieceDetails } from "./pieceTypes";
 
 export default function Piece(props: { details: PieceDetails }) {
 

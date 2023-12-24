@@ -1,4 +1,4 @@
-import SideNav from "./Navigation/SideNav";
+import SideNav from "../FrontEndComponents/SideNav/SideNav";
 import { Outlet } from "react-router-dom"
 
 
