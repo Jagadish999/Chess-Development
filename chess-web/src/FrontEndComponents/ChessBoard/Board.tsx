@@ -1,11 +1,11 @@
-import { pieceDetails } from "./pieceDetails";
-import Piece from "./Piece";
 
-export default function Board(props: { initialFenPos: string }) {
+import Piece from "./Piece";
+import { PieceDetails } from "./pieceTypes";
+
+export default function Board(props: { moveDetails: PieceDetails [] }) {
 
     
-    const details = pieceDetails(props.initialFenPos);
-
+    const details = props.moveDetails;
 
     return (
         <div className="bg-[url('/public/Images/brd.webp')] w-[600px] h-[600px] bg-no-repeat bg-cover relative">

@@ -1,18 +1,13 @@
 import { fillChessBoardArray, calculateRawMove } from "./pieceCalculation";
 import { PieceDetails } from "./pieceTypes";
 
-export function pieceDetails(pieceFenPos: string) {
+export function findPieceMoveDetails(pieceFenPos: string) {
 
-    //Initial piece positions
-    const piecesInfoInFen = pieceFenPos.split(" ")[0];
-    const unphasantMove = pieceFenPos.split(" ")[3];
-
-    const [chessBoard, chessBoardExtended] = fillChessBoardArray(piecesInfoInFen);
+    const fenPosInfo = pieceFenPos.split(" ");
+    const [chessBoard, chessBoardExtended] = fillChessBoardArray(fenPosInfo[0]);
     
-    const pieceDetail: PieceDetails[] = calculateRawMove(chessBoardExtended, unphasantMove);
-    
-    console.log(chessBoardExtended);
-    console.log(chessBoard);
+    const pieceDetail: PieceDetails[] = calculateRawMove(chessBoardExtended, fenPosInfo[3], fenPosInfo[2]);
+    console.log(pieceDetail);
 
     return pieceDetail;
 }

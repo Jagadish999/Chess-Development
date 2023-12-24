@@ -9,7 +9,7 @@ export default function RootNavigation() {
             <nav className="w-1/6 bg-gray-800">
                 <SideNav></SideNav>
             </nav>
-            <div className="w-5/6">
+            <div className="w-5/6 bg-slate-500">
                 <Outlet />
             </div>
         </div>
