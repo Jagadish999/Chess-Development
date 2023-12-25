@@ -8,9 +8,28 @@ export type PieceDetails = {
     unphasant: Move[];//special move for pawn for unphasant
     castle: Move[];//king permission to castle
 }
+
 //Move to respective file and rank
 export type Move = {
     
     file: number,
     rank: number
+}
+
+//Details for move of a pawn
+export type PawnDetails = {
+    singleForward: number,
+    doubleForward: number, 
+    captureRight: number,
+    captureLeft: number, 
+    firstPawnPos: number,
+    lastPawnPos: number
+}
+
+//Piece moves details
+export type PieceMoves = {
+    linearMove: Move[],
+    captureMove: Move[],
+    unphasantMove: Move[],
+    castle: Move[]
 }

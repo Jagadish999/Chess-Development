@@ -7,7 +7,7 @@ export default function Piece(props: { details: PieceDetails }) {
     const pieceDetail = props.details;
 
     const topPos = (8 - pieceDetail.rank) * 75;
-    const leftPos = (8 - pieceDetail.file) * 75;
+    const leftPos = (pieceDetail.file - 1) * 75;
     return (
         <img
             src={`/Images/${pieceDetail.color}/${pieceDetail.pieceName}.png`}

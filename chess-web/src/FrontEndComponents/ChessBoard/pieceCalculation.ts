@@ -1,9 +1,9 @@
-import { PieceDetails, Move } from "./pieceTypes";
+import { PieceDetails, Move, PawnDetails, PieceMoves } from "./pieceTypes";
 
 /*
 Takes chessBoardExtended as parameter and returns all the unfiltered moves
 */
-export function calculateRawMove(chessBoardExtended: number[] | string[], unphasantMove: string, castlePermission: string) {
+export function calculateRawMove(chessBoardExtended: number[] | string[], unphasantMove: string, castlePermission: string, turn: string) {
 
     const rookMoveDirection = [1, -1, +10, -10];
     const bishopMoveDirection = [11, 9, -11, -9];
@@ -13,42 +13,235 @@ export function calculateRawMove(chessBoardExtended: number[] | string[], unphas
 
     const tempPieceDetails: PieceDetails[] = [];
 
-    for (let boardIndex = 22; boardIndex <= chessBoardExtended.length - 21; boardIndex++) {
+    for (let boardIndex = 21; boardIndex <= chessBoardExtended.length - 20; boardIndex++) {
 
-        if (chessBoardExtended[boardIndex] === 0 || chessBoardExtended[boardIndex] === 1) continue;
-
-        //Receives only index with string here
         const currentPiece = chessBoardExtended[boardIndex];
 
-        if (currentPiece === 'p') tempPieceDetails.push(blackPawnMovement(currentPiece, boardIndex, chessBoardExtended, unphasantMove));
-        else if (currentPiece === 'P') tempPieceDetails.push(whitePawnMovement(currentPiece, boardIndex, chessBoardExtended, unphasantMove));
-        else if (currentPiece === 'n' || currentPiece === 'N') tempPieceDetails.push(nightMovement(currentPiece, boardIndex, chessBoardExtended, nightMoveDirection));
-        else if (currentPiece === 'k' || currentPiece === 'K') tempPieceDetails.push(kingMovement(currentPiece, boardIndex, chessBoardExtended, kingMoveDirection, castlePermission));
-        else if (currentPiece === 'q' || currentPiece === 'Q') tempPieceDetails.push(rookBishopQueenMovement(currentPiece, boardIndex, chessBoardExtended, queenMoveDirection));
-        else if (currentPiece === 'r' || currentPiece === 'R') tempPieceDetails.push(rookBishopQueenMovement(currentPiece, boardIndex, chessBoardExtended, rookMoveDirection));
-        else if (currentPiece === 'b' || currentPiece === 'B') tempPieceDetails.push(rookBishopQueenMovement(currentPiece, boardIndex, chessBoardExtended, bishopMoveDirection));
+        if (currentPiece === 0 || currentPiece === 1) continue;
+
+        const rankAndFile = findRankAndFile(boardIndex);
+        const color = currentPiece.toString().toUpperCase() === currentPiece ? "w" : "b";
+
+        let tempMoveDetails: PieceDetails = {
+            rank: rankAndFile.rank,
+            file: rankAndFile.file,
+            pieceName: currentPiece.toString(),
+            color: color,
+            linearMove: [],
+            capture: [],
+            unphasant: [],
+            castle: []
+        };
+
+        let tempEachPieceMoves: PieceMoves;
+            
+        if(currentPiece === 'p'){
+
+            const unphasantCaptureIdx = unphasantMove !== '-' ?  locationToSqNum(unphasantMove) + 19 + (parseInt(unphasantMove[1])) * 2 - 1: null;
+            const blackPawnConstants: PawnDetails = {
+                singleForward: boardIndex - 10,
+                doubleForward: boardIndex - 20,
+                captureRight: boardIndex - 9,
+                captureLeft: boardIndex - 11,
+                firstPawnPos: 81,
+                lastPawnPos: 88
+            }
+
+            tempEachPieceMoves = pawnMovement(color, boardIndex, chessBoardExtended, unphasantCaptureIdx, blackPawnConstants, turn);
+        }
+        else if(currentPiece === 'P'){
+
+            const unphasantCaptureIdx = unphasantMove !== '-' ?  locationToSqNum(unphasantMove) + 19 + (parseInt(unphasantMove[1])) * 2 - 1: null;
+            const whitePawnConstants: PawnDetails = {
+                singleForward: boardIndex + 10,
+                doubleForward: boardIndex + 20,
+                captureRight: boardIndex + 11,
+                captureLeft: boardIndex + 9,
+                firstPawnPos: 31,
+                lastPawnPos: 38
+            }
+
+            tempEachPieceMoves = pawnMovement(color, boardIndex, chessBoardExtended, unphasantCaptureIdx, whitePawnConstants, turn);
+
+        }
+        else if(currentPiece === 'n' || currentPiece === 'N'){
+            tempEachPieceMoves= nightMovement(color, boardIndex, chessBoardExtended, nightMoveDirection);
+        }
+        else if (currentPiece === 'k' || currentPiece === 'K'){
+            tempEachPieceMoves = kingMovement(color, boardIndex, chessBoardExtended, kingMoveDirection, castlePermission);
+        }
+        else if (currentPiece === 'q' || currentPiece === 'Q'){
+            tempEachPieceMoves = rookBishopQueenMovement(color, boardIndex, chessBoardExtended, queenMoveDirection);
+        } 
+        else if (currentPiece === 'r' || currentPiece === 'R'){
+            tempEachPieceMoves = rookBishopQueenMovement(color, boardIndex, chessBoardExtended, rookMoveDirection);
+        } 
+        else{
+            tempEachPieceMoves = rookBishopQueenMovement(color, boardIndex, chessBoardExtended, bishopMoveDirection);
+        } 
+   
+        tempMoveDetails.linearMove = tempEachPieceMoves.linearMove;
+        tempMoveDetails.capture = tempEachPieceMoves.captureMove;
+        tempMoveDetails.unphasant = tempEachPieceMoves.unphasantMove;
+        tempMoveDetails.castle = tempEachPieceMoves.castle;
+
+        tempPieceDetails.push(tempMoveDetails);
     }
 
     return tempPieceDetails;
 }
 
+function rookBishopQueenMovement(color:string, boardIndex: number, chessBoardExtended: number[] | string[], moveDirection: number[]){
+
+    let tempMoves: PieceMoves = {
+        linearMove: [],
+        captureMove: [],
+        unphasantMove: [],
+        castle: []
+    }
+
+    for (let i = 0; i < moveDirection.length; i++) {
+
+        let nextPiecePosition = boardIndex + moveDirection[i];
+        while (chessBoardExtended[nextPiecePosition] !== 1) {
+
+            if (chessBoardExtended[nextPiecePosition] === 0){
+
+                tempMoves.linearMove.push(findRankAndFile(nextPiecePosition))
+            } 
+            else if (typeof chessBoardExtended[nextPiecePosition] === 'string' && !checkOwnPiece(color, chessBoardExtended[nextPiecePosition].toString())) {
+                tempMoves.captureMove.push(findRankAndFile(nextPiecePosition));
+                break;
+            }
+            else if (checkOwnPiece(color, chessBoardExtended[nextPiecePosition].toString())) break;
+            nextPiecePosition += moveDirection[i];
+        }
+    }
+
+    return tempMoves;
+}
+
+function kingMovement(color:string, boardIndex: number, chessBoardExtended: number[] | string[], kingMoveDirection: number[], castlePermission: string){
+
+    let tempMoves: PieceMoves = {
+        linearMove: [],
+        captureMove: [],
+        unphasantMove: [],
+        castle: []
+    }
+
+    for (let i = 0; i < kingMoveDirection.length; i++) {
+        const nextKingPos = boardIndex + kingMoveDirection[i];
+
+        if (chessBoardExtended[nextKingPos] === 0){
+            tempMoves.linearMove.push(findRankAndFile(nextKingPos));
+        } 
+        else if (typeof chessBoardExtended[nextKingPos] === 'string' && !checkOwnPiece(color, chessBoardExtended[nextKingPos].toString())){
+            tempMoves.captureMove.push(findRankAndFile(nextKingPos));
+        }
+    }
+
+    if(color === 'w'){
+        if(castlePermission.includes('K') && chessBoardExtended[26] === 0 && chessBoardExtended[27] === 0){
+            tempMoves.castle.push(findRankAndFile(27));
+        }
+        if(castlePermission.includes('Q') && chessBoardExtended[24] === 0 && chessBoardExtended[23] === 0 && chessBoardExtended[22] === 0){
+            tempMoves.castle.push(findRankAndFile(23));
+        }
+    }
+    else{
+        if(castlePermission.includes('k') && chessBoardExtended[96] === 0 && chessBoardExtended[97] === 0){
+            tempMoves.castle.push(findRankAndFile(97));
+        }
+        if(castlePermission.includes('q') && chessBoardExtended[94] === 0 && chessBoardExtended[93] === 0 && chessBoardExtended[92] === 0){
+            tempMoves.castle.push(findRankAndFile(93));
+        }
+    }
+    return tempMoves;
+}
+
+function nightMovement(color:string, boardIndex: number, chessBoardExtended: number[] | string[], nightMoveDirection: number[]){
+
+    let tempMoves: PieceMoves = {
+        linearMove: [],
+        captureMove: [],
+        unphasantMove: [],
+        castle: []
+    }
+    
+    for (let i = 0; i < nightMoveDirection.length; i++) {
+        const nextNightPos = boardIndex + nightMoveDirection[i];
+
+        if (chessBoardExtended[nextNightPos] === 0){
+            tempMoves.linearMove.push(findRankAndFile(nextNightPos));
+        } 
+        else if (typeof chessBoardExtended[nextNightPos] === 'string' && !checkOwnPiece(color, chessBoardExtended[nextNightPos].toString())){
+            tempMoves.captureMove.push(findRankAndFile(nextNightPos));
+        } 
+
+    }
+
+    return tempMoves;
+}
+
+function pawnMovement(color: string, boardIndex: number, chessBoardExtended: number[] | string[], unphasantMove: null | number, pawnDetails: PawnDetails, turn: string){
+
+    let tempMoves: PieceMoves = {
+        linearMove: [],
+        captureMove: [],
+        unphasantMove: [],
+        castle: []
+    }
+
+    if (chessBoardExtended[pawnDetails.singleForward] === 0) {
+        tempMoves.linearMove.push(findRankAndFile(pawnDetails.singleForward));
+
+        if (boardIndex >= pawnDetails.firstPawnPos && boardIndex <= pawnDetails.lastPawnPos && chessBoardExtended[pawnDetails.doubleForward] === 0){
+            tempMoves.linearMove.push(findRankAndFile(pawnDetails.doubleForward));
+        }
+    }
+    if (chessBoardExtended[pawnDetails.captureRight] !== 1 && chessBoardExtended[pawnDetails.captureRight] !== 0 && !checkOwnPiece(color, chessBoardExtended[pawnDetails.captureRight].toString())) {
+        tempMoves.captureMove.push(findRankAndFile(pawnDetails.captureRight));
+    }
+
+    if (chessBoardExtended[pawnDetails.captureLeft] !== 1 && chessBoardExtended[pawnDetails.captureLeft] !== 0 && !checkOwnPiece(color, chessBoardExtended[pawnDetails.captureLeft].toString())){
+        tempMoves.captureMove.push(findRankAndFile(pawnDetails.captureLeft));
+    }
+
+    if(unphasantMove){
+        if(color === "b" && color === turn){
+            if(boardIndex - 11 === unphasantMove || boardIndex - 9 === unphasantMove ){
+                tempMoves.unphasantMove.push(findRankAndFile(unphasantMove));
+            }
+        }
+        else if(color === "w" && color === turn){
+            if(boardIndex + 11 === unphasantMove || boardIndex + 9 === unphasantMove ){
+                tempMoves.unphasantMove.push(findRankAndFile(unphasantMove));
+            }
+        }
+    }
+    
+    return tempMoves;
+}
+
+//Get rank and file number of 8x8 board by providing index of 120sq board
 function findRankAndFile(ExtendedBoardIdx: number) {
 
-    const rank = Math.ceil((ExtendedBoardIdx + 1) / 10) - 2;
-    const file = rank * 8 - (ExtendedBoardIdx - 20 - rank * 2); 
-    // const file = 8 - (ExtendedBoardIdx - 20 + (rank - 1) * 2);
+    const rank = Math.ceil((ExtendedBoardIdx + 1) / 10);
+    const file = ExtendedBoardIdx - (rank - 1) * 10;
 
-    return { rank: rank, file: file };
+    return { rank: rank - 2, file: file};
 }
 
 //returns true for pieces of same color and false for alternating
-function checkOwnPiece(pieceColor: string, comparePiece: string): boolean{
+function checkOwnPiece(pieceColor: string, comparePiece: string): boolean {
 
     const comparePieceColor = comparePiece.toUpperCase() === comparePiece ? "w" : "b";
     return comparePieceColor === pieceColor;
 }
 
-function locationToSqNum(squareCode:string ){
+//Get square number in 8X8 board with sqauare code
+function locationToSqNum(squareCode: string) {
 
     const fileNums = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -56,159 +249,6 @@ function locationToSqNum(squareCode:string ){
     const file = fileNums.indexOf(squareCode[0]) + 1;
 
     return (rank - 1) * 8 + file;
-    
-}
-
-function whitePawnMovement(currentPiece: string, boardIndex: number, chessBoardExtended: number [] | string[], unphasantMove: string): PieceDetails {
-
-    const rankAndFile = findRankAndFile(boardIndex);
-    const color = currentPiece.toUpperCase() === currentPiece ? "w" : "b";
-
-    let tempMoveDetails: PieceDetails = {
-        rank: rankAndFile.rank,
-        file: rankAndFile.file,
-        pieceName: currentPiece,
-        color: color,
-        linearMove: [],
-        capture: [],
-        unphasant: [],
-        castle: []
-    }
-
-    const singleForward = boardIndex + 10;
-    const doubleForward = boardIndex + 20;
-    const captureRight = boardIndex + 11;
-    const captureLeft = boardIndex + 9;
-    // const unphasantCapture = unphasantMove !== '-' ?  locationToSqNum(unphasantMove) + 20 + rankAndFile.rank * 2 : null;
-    // console.log(unphasantCapture)
-    if(chessBoardExtended[singleForward] === 0){
-        tempMoveDetails.linearMove.push(findRankAndFile(singleForward));
-
-        if(boardIndex >= 31 && boardIndex <= 38 && chessBoardExtended[doubleForward] === 0) tempMoveDetails.linearMove.push(findRankAndFile(doubleForward));
-    }
-    if(chessBoardExtended[captureRight] !== 1 && chessBoardExtended[captureRight] !== 0 && !checkOwnPiece(color, chessBoardExtended[captureRight].toString())) tempMoveDetails.capture.push(findRankAndFile(captureRight));
-
-    if(chessBoardExtended[captureLeft] !== 1 && chessBoardExtended[captureLeft] !== 0 && !checkOwnPiece(color, chessBoardExtended[captureLeft].toString())) tempMoveDetails.capture.push(findRankAndFile(captureLeft));
-
-    return tempMoveDetails;
-}
-
-function blackPawnMovement(currentPiece: string, boardIndex: number, chessBoardExtended: number[] | string[], unphasantMove: string) {
-
-    const rankAndFile = findRankAndFile(boardIndex);
-    const color = currentPiece.toUpperCase() === currentPiece ? "w" : "b";
-
-    let tempMoveDetails: PieceDetails = {
-        rank: rankAndFile.rank,
-        file: rankAndFile.file,
-        pieceName: currentPiece,
-        color: color,
-        linearMove: [],
-        capture: [],
-        unphasant: [],
-        castle: []
-    }
-
-    const singleForward = boardIndex - 10;
-    const doubleForward = boardIndex - 20;
-    const captureRight = boardIndex - 9;
-    const captureLeft = boardIndex - 11;
-    // const unphasantCapture = unphasantMove !== '-' ?  locationToSqNum(unphasantMove) + 20 + rankAndFile.rank * 2 : null;
-    // console.log(unphasantCapture)
-    if(chessBoardExtended[singleForward] === 0){
-        tempMoveDetails.linearMove.push(findRankAndFile(singleForward));
-
-        if(boardIndex >= 81 && boardIndex <= 88 && chessBoardExtended[doubleForward] === 0) tempMoveDetails.linearMove.push(findRankAndFile(doubleForward));
-    }
-    if(chessBoardExtended[captureRight] !== 1 && chessBoardExtended[captureRight] !== 0 && !checkOwnPiece(color, chessBoardExtended[captureRight].toString())) tempMoveDetails.capture.push(findRankAndFile(captureRight));
-
-    if(chessBoardExtended[captureLeft] !== 1 && chessBoardExtended[captureLeft] !== 0 && !checkOwnPiece(color, chessBoardExtended[captureLeft].toString())) tempMoveDetails.capture.push(findRankAndFile(captureLeft));
-
-    return tempMoveDetails;
-}
-
-function kingMovement(currentPiece: string, boardIndex: number, chessBoardExtended: number[] | string[], kingMoveDirection: number[], castlePermission: string) {
-    const rankAndFile = findRankAndFile(boardIndex);
-    const color = currentPiece.toUpperCase() === currentPiece ? "w" : "b";
-
-    let tempMoveDetails: PieceDetails = {
-        rank: rankAndFile.rank,
-        file: rankAndFile.file,
-        pieceName: currentPiece,
-        color: color,
-        linearMove: [],
-        capture: [],
-        unphasant: [],
-        castle: []
-    }
-
-    for(let i = 0; i < kingMoveDirection.length; i++){
-        const nextKingPos = boardIndex + kingMoveDirection[i];
-
-        if(chessBoardExtended[nextKingPos] === 0) tempMoveDetails.linearMove.push(findRankAndFile(nextKingPos));
-        else if(typeof chessBoardExtended[nextKingPos] === 'string' && !checkOwnPiece(color, chessBoardExtended[nextKingPos].toString())) tempMoveDetails.capture.push(findRankAndFile(nextKingPos));
-
-    }
-
-    return tempMoveDetails;
-}
-
-
-function rookBishopQueenMovement(currentPiece: string, boardIndex: number, chessBoardExtended: number[] | string[], moveDirection: number[]) {
-    const rankAndFile = findRankAndFile(boardIndex);
-    const color = currentPiece.toUpperCase() === currentPiece ? "w" : "b";
-
-    let tempMoveDetails: PieceDetails = {
-        rank: rankAndFile.rank,
-        file: rankAndFile.file,
-        pieceName: currentPiece,
-        color: color,
-        linearMove: [],
-        capture: [],
-        unphasant: [],
-        castle: []
-    }
-
-    for(let i = 0; i < moveDirection.length; i++){
-        
-        let nextPiecePosition = boardIndex + moveDirection[i];
-        while(chessBoardExtended[nextPiecePosition] !== 1){
-
-            if(chessBoardExtended[nextPiecePosition] === 0) tempMoveDetails.linearMove.push(findRankAndFile(nextPiecePosition))
-            else if(typeof chessBoardExtended[nextPiecePosition] === 'string' && !checkOwnPiece(color, chessBoardExtended[nextPiecePosition].toString())){
-                tempMoveDetails.capture.push(findRankAndFile(nextPiecePosition));
-                break;
-            }
-            nextPiecePosition += moveDirection[i];
-        }
-    }
-
-    return tempMoveDetails;
-}
-
-function nightMovement(currentPiece: string, boardIndex: number, chessBoardExtended: number[] | string[], nightMoveDirection: number[]) {
-    const rankAndFile = findRankAndFile(boardIndex);
-    const color = currentPiece.toUpperCase() === currentPiece ? "w" : "b";
-
-    let tempMoveDetails: PieceDetails = {
-        rank: rankAndFile.rank,
-        file: rankAndFile.file,
-        pieceName: currentPiece,
-        color: color,
-        linearMove: [],
-        capture: [],
-        unphasant: [],
-        castle: []
-    }
-
-    for(let i = 0; i < nightMoveDirection.length; i++){
-        const nextNightPos = boardIndex + nightMoveDirection[i];
-
-        if(chessBoardExtended[nextNightPos] === 0) tempMoveDetails.linearMove.push(findRankAndFile(nextNightPos));
-        else if(typeof chessBoardExtended[nextNightPos] === 'string' && !checkOwnPiece(color, chessBoardExtended[nextNightPos].toString())) tempMoveDetails.capture.push(findRankAndFile(nextNightPos));
-
-    }
-    return tempMoveDetails;
 }
 
 /*
@@ -234,7 +274,7 @@ export function fillChessBoardArray(pieceInfo: string) {
         const rank = Math.ceil((positionCounter + 1) / 8);
 
         //Position of extendedChessBoard equivalent to chessboard array
-        const currentExtendedPos = positionCounter + 20 + rank * 2;
+        const currentExtendedPos = positionCounter + 19 + rank * 2;
 
         //Place piece char in chessboard and extended chess board
         if (currentChar === 'R' || currentChar === 'r' || currentChar === 'N' || currentChar === 'n' || currentChar === 'B' || currentChar === 'b' || currentChar === 'k' || currentChar === 'K' || currentChar === 'q' || currentChar === 'Q' || currentChar === 'p' || currentChar === 'P') {
@@ -253,5 +293,5 @@ export function fillChessBoardArray(pieceInfo: string) {
         }
     }
 
-    return [chessBoard, chessBoardExtended]
+    return [chessBoard, chessBoardExtended];
 }

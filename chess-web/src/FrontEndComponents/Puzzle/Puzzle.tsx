@@ -4,7 +4,7 @@ import { PieceDetails } from "../ChessBoard/pieceTypes";
 
 export default function Puzzle(){
 
-    const initialFenPosition = "r3k2r/p3p1pp/1ppnp1b1/2q2p2/PPNnBPQb/R2P1N2/3P2PP/2B1K2R w KQkq - 0 1";
+    const initialFenPosition = "r3k2r/5b2/3nq3/P5pP/1PNnBpP1/3PN3/3P1P2/R3K2R w KQkq g6 0 1";
     const pieceDetails:PieceDetails [] = findPieceMoveDetails(initialFenPosition);
 
     return (
