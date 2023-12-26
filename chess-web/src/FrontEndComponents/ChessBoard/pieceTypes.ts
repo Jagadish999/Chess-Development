@@ -10,8 +10,7 @@ export type PieceDetails = {
 }
 
 //Move to respective file and rank
-export type Move = {
-    
+export type Move = { 
     file: number,
     rank: number
 }
@@ -33,3 +32,29 @@ export type PieceMoves = {
     unphasantMove: Move[],
     castle: Move[]
 }
+
+export type BoardStatus = {
+    check: boolean;
+    checkmate: boolean;
+    stalemate: boolean;
+    
+}
+
+export type CastleDetails = {
+  whiteKingMoved: boolean;
+  whiteKingChecked: boolean;
+  whiteKingSideRookMoved: boolean;
+  whiteKingSideRookCaptured: boolean;
+  whiteKingSideSquaresChecked: boolean;
+  whiteQueenSideRookMoved: boolean;
+  whiteQueenSideRookCaptured: boolean;
+  whiteQueenSideSquaresChecked: boolean;
+  blackKingMoved: boolean;
+  blackKingChecked: boolean;
+  blackKingSideRookMoved: boolean;
+  blackKingSideRookCaptured: boolean;
+  blackKingSideSquaresChecked: boolean;
+  blackQueenSideRookMoved: boolean;
+  blackQueenSideRookCaptured: boolean;
+  blackQueenSideSquaresChecked: boolean;
+};
