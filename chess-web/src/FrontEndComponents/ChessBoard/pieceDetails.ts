@@ -1,5 +1,43 @@
 import { PieceDetails, PawnDetails, PieceMoves } from "./pieceTypes";
 
+export function verifyCheck(pieceMoveDetails: PieceDetails[], turnToMove: string){
+
+    //find king location
+    const kingPiece = turnToMove === "w" ? pieceMoveDetails.find(pieceDetail => pieceDetail.pieceName === "K") : pieceMoveDetails.find(pieceDetail => pieceDetail.pieceName === "k");
+    const kingLocation = { file: kingPiece?.file, rank: kingPiece?.rank };
+
+
+    for (const eachPieceDetail of pieceMoveDetails) {
+
+        //Check until king has been spotted in check with opposite piece
+        if (eachPieceDetail.color !== turnToMove && eachPieceDetail.pieceName !== "K" && eachPieceDetail.pieceName !== "k") {
+
+            for (const eachPieceCapture of eachPieceDetail.capture) {
+                if (eachPieceCapture.file === kingLocation.file && eachPieceCapture.rank === kingLocation.rank) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+export function verifyMovesAvailable(pieceMoveDetails: PieceDetails[], turnToMove: string){
+
+    for (const eachPieceDetail of pieceMoveDetails) {
+
+        //Check moves lenght if opposite color for checkmate or stalemate checking
+        if (eachPieceDetail.color !== turnToMove) {
+            if (eachPieceDetail.linearMove.length > 0 || eachPieceDetail.capture.length > 0 || eachPieceDetail.castle.length > 0 || eachPieceDetail.unphasant.length > 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 /*
 Takes chessBoardExtended as parameter and returns all the unfiltered moves
 */
@@ -238,6 +276,12 @@ function checkOwnPiece(pieceColor: string, comparePiece: string): boolean {
     const comparePieceColor = comparePiece.toUpperCase() === comparePiece ? "w" : "b";
     return comparePieceColor === pieceColor;
 }
+export function fileAndRankToStrCode(rank: number, file:number): string{
+
+    const fileNums = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    return fileNums[file - 1] + rank.toString();
+}
 
 //Get square number in 8X8 board with sqauare code
 function locationToSqNum(squareCode: string) {
@@ -247,6 +291,10 @@ function locationToSqNum(squareCode: string) {
     const rank = parseInt(squareCode[1]);
     const file = fileNums.indexOf(squareCode[0]) + 1;
 
+    return (rank - 1) * 8 + file;
+}
+
+export function fileAndRankToSq(rank: number, file: number): number{
     return (rank - 1) * 8 + file;
 }
 
