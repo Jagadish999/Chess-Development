@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { PieceDetails } from "./pieceTypes";
 
-export default function Piece(props: { details: PieceDetails }) {
+export default function Piece(props: { details: PieceDetails, pieceClicked: Function }) {
 
     const pieceDetail = props.details;
 
@@ -14,6 +14,7 @@ export default function Piece(props: { details: PieceDetails }) {
             alt="Piece Img"
             className={"absolute w-[75px] h-[75px]"}
             style={{ top: `${(topPos)}px`, left: `${leftPos}px` }}
+            onClick={() => {props.pieceClicked(pieceDetail)}}
             >
         </img>
     )

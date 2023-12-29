@@ -1,7 +1,7 @@
 import { calculateRawMove, fileAndRankToSq, fileAndRankToStrCode, fillChessBoardArray, verifyCheck } from "./pieceDetails";
 import { CastleDetails, Location, PieceDetails } from "./pieceTypes";
 
-//Takes fen position and returns all the valid moves
+//Takes fen position and castle details and returns all the valid moves
 export function findPieceMoveDetails(pieceFenPos: string, castleInfo: CastleDetails) {
 
     const fenPosInfo = pieceFenPos.split(" ");
