@@ -18,16 +18,17 @@ export default function Board(props: { moveDetails: PieceDetails[] }) {
         if (clickedPiece === null) {
             setClickedPiece(currentClicked);
         }
-        else if(clickedPiece.file === currentClicked.file && clickedPiece.rank === currentClicked.rank){
+        else if (clickedPiece.file === currentClicked.file && clickedPiece.rank === currentClicked.rank) {
             setClickedPiece(null);
         }
-        else{
+        else {
             setClickedPiece(currentClicked);
         }
     }
     return (
         <div
-            className={`bg-[url('/public/Images/brd.webp')] w-[${boardSize}px] h-[${boardSize}px] bg-no-repeat bg-cover relative`}
+            className={`bg-no-repeat bg-cover relative`}
+            style={{ backgroundImage: `url(${'/Images/Board.png'})`, width: `${boardSize}px`, height: `${boardSize}px` }}
         >
 
             {details.map((value, index) => {
@@ -46,6 +47,39 @@ export default function Board(props: { moveDetails: PieceDetails[] }) {
                                 file={value.file}
                                 rank={value.rank}
                                 color={"green"}
+                            />)
+                    })}
+
+                    {clickedPiece.capture.map((value: Location, index) => {
+                        return (
+                            <HighLightedSquare
+                                key={index}
+                                size={boardSize / 8}
+                                file={value.file}
+                                rank={value.rank}
+                                color={"red"}
+                            />)
+                    })}
+
+                    {clickedPiece.unphasant.map((value: Location, index) => {
+                        return (
+                            <HighLightedSquare
+                                key={index}
+                                size={boardSize / 8}
+                                file={value.file}
+                                rank={value.rank}
+                                color={"blue"}
+                            />)
+                    })}
+
+                    {clickedPiece.castle.map((value: Location, index) => {
+                        return (
+                            <HighLightedSquare
+                                key={index}
+                                size={boardSize / 8}
+                                file={value.file}
+                                rank={value.rank}
+                                color={"purple"}
                             />)
                     })}
                 </>
