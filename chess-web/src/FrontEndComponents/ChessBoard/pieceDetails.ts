@@ -49,6 +49,7 @@ export function calculateRawMove(chessBoardExtended: number[] | string[], unphas
     const kingMoveDirection = [1, -1, 10, -10, 11, 9, -11, -9];
     const queenMoveDirection = [...rookMoveDirection, ...bishopMoveDirection];
 
+    
     const tempPieceDetails: PieceDetails[] = [];
 
     for (let boardIndex = 21; boardIndex <= chessBoardExtended.length - 20; boardIndex++) {

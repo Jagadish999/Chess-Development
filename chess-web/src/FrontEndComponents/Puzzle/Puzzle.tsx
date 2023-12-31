@@ -29,7 +29,7 @@ export default function Puzzle(){
 
     return (
         <div className="block mt-[4%] ml-[16%]">
-            <Board moveDetails={pieceDetails}/>
+            {/* <Board moveDetails={pieceDetails}/> */}
         </div>
     )
 }

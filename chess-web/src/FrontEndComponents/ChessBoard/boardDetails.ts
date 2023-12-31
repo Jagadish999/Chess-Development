@@ -10,9 +10,8 @@ export function findPieceMoveDetails(pieceFenPos: string, castleInfo: CastleDeta
     const pieceDetail: PieceDetails[] = calculateRawMove(chessBoardExtended, fenPosInfo[3], fenPosInfo[2], fenPosInfo[1]);
     // const checkStatus = checkBoardStatus(pieceDetail, fenPosInfo[1]);
     const filteredMoves: PieceDetails[] = filterMoves(pieceDetail, fenPosInfo[1], chessBoard, castleInfo);
-    console.log(filteredMoves);
 
-    return pieceDetail;
+    return filteredMoves;
 }
 
 //Filter moves of every piece by moving them and check if still check exist or not
@@ -108,15 +107,16 @@ export function filterMoves(pieceMoveDetails: PieceDetails[], turnToMove: string
     return tempPieceDetails;
 }
 
+
 //To Find If unphasant move is possible or not
 export function unphasantPossibility(pieceDetail: PieceDetails, chessBoard: number[] | string[], destination: Location): string{
 
     const moveSqNumIdx = fileAndRankToSq(destination.rank, destination.file) - 1;
 
-    if(pieceDetail.color === 'p' && pieceDetail.rank === 7 && destination.rank === 5 && (chessBoard[moveSqNumIdx + 1] === 'P' || chessBoard[moveSqNumIdx - 1]) === 'P'){
+    if(pieceDetail.pieceName === 'p' && pieceDetail.color === 'b' && pieceDetail.rank === 7 && destination.rank === 5 && (chessBoard[moveSqNumIdx + 1] === 'P' || chessBoard[moveSqNumIdx - 1] === 'P')){
         return fileAndRankToStrCode(destination.rank + 1, destination.file);
     }
-    else if(pieceDetail.color === 'P' && pieceDetail.rank === 2 && destination.rank === 4 && (chessBoard[moveSqNumIdx + 1] === 'p' || chessBoard[moveSqNumIdx - 1]) === 'p'){
+    else if(pieceDetail.pieceName === 'P' && pieceDetail.color === 'w' && pieceDetail.rank === 2 && destination.rank === 4 && (chessBoard[moveSqNumIdx + 1] === 'p' || chessBoard[moveSqNumIdx - 1] === 'p')){
         return fileAndRankToStrCode(destination.rank - 1, destination.file);
     }
 
@@ -125,7 +125,8 @@ export function unphasantPossibility(pieceDetail: PieceDetails, chessBoard: numb
 
 export function updatedCastlePermission(castleInfo: CastleDetails, moveLocation: Location, currentPieceDetail: PieceDetails, pieceDetails: PieceDetails[], chessBoard: number[] | string[]):string {
 
-    const tempCastleInfo = Object.assign({}, castleInfo);
+    // const tempCastleInfo = Object.assign({}, castleInfo);
+    const tempCastleInfo = castleInfo;
 
     if (currentPieceDetail.pieceName === 'K') {
         tempCastleInfo.whiteKingMoved = true;
@@ -145,7 +146,7 @@ export function updatedCastlePermission(castleInfo: CastleDetails, moveLocation:
         if (currentPieceDetail.rank === 8 && currentPieceDetail.file === 8) {
             tempCastleInfo.blackKingSideRookMoved = true;
         }
-        else if (currentPieceDetail.rank === 1 && currentPieceDetail.file === 1) {
+        else if (currentPieceDetail.rank === 8 && currentPieceDetail.file === 1) {
             tempCastleInfo.blackQueenSideRookMoved = true;
         }
     }
@@ -162,7 +163,7 @@ export function updatedCastlePermission(castleInfo: CastleDetails, moveLocation:
         tempCastleInfo.blackKingSideRookCaptured = true;
     }
 
-    if(chessBoard[57] !== 'r'){
+    if(chessBoard[56] !== 'r'){
         tempCastleInfo.blackQueenSideRookCaptured = true;
     }
 
@@ -250,7 +251,8 @@ export function movePieceInBoard(chessBoard: number[] | string[], currentLocatio
     tempChessBrd[destinationSqNum - 1] = chessBoard[currentSqNum - 1];
 
     //If unphasant or castle or pawn promotion
-    if (moveType === 'p' && pawnPromotedTo) {
+    if (pawnPromotedTo) {
+    
         tempChessBrd[destinationSqNum - 1] = pawnPromotedTo;
     }
     else if (moveType === 'c') {
@@ -274,12 +276,17 @@ export function movePieceInBoard(chessBoard: number[] | string[], currentLocatio
     }
 
     else if (moveType === 'u') {
+
+        console.log("YEsssss", chessBoard[currentSqNum - 1]);
+        console.log(destinationSqNum + "____________");
         //It is white piece
-        if (chessBoard[currentSqNum].toString().toUpperCase() === chessBoard[currentSqNum]) {
+        if (chessBoard[currentSqNum - 1].toString().toUpperCase() === chessBoard[currentSqNum - 1]) {
+            console.log(tempChessBrd[destinationSqNum - 9]);
             tempChessBrd[destinationSqNum - 9] = 0;
         }
         else {
-            tempChessBrd[destinationSqNum + 9] = 0;
+            console.log("kjhfkjsdhfuijksdhfijksdh", tempChessBrd[destinationSqNum + 7])
+            tempChessBrd[destinationSqNum + 7] = 0;
         }
     }
 
@@ -313,6 +320,8 @@ export function movePieceInBoard(chessBoard: number[] | string[], currentLocatio
             }
         }
     }
+
+    newPieceDetail = newPieceDetail.split("/").reverse().join("/");
 
     return newPieceDetail;
 }
