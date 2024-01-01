@@ -277,15 +277,11 @@ export function movePieceInBoard(chessBoard: number[] | string[], currentLocatio
 
     else if (moveType === 'u') {
 
-        console.log("YEsssss", chessBoard[currentSqNum - 1]);
-        console.log(destinationSqNum + "____________");
         //It is white piece
         if (chessBoard[currentSqNum - 1].toString().toUpperCase() === chessBoard[currentSqNum - 1]) {
-            console.log(tempChessBrd[destinationSqNum - 9]);
             tempChessBrd[destinationSqNum - 9] = 0;
         }
         else {
-            console.log("kjhfkjsdhfuijksdhfijksdh", tempChessBrd[destinationSqNum + 7])
             tempChessBrd[destinationSqNum + 7] = 0;
         }
     }
