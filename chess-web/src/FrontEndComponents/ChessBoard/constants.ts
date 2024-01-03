@@ -1,6 +1,6 @@
 import { CastleDetails } from "./pieceTypes";
 
-export const INITIAL_FEN_POSITION = "rnbqkbnr/1p1ppppp/p7/4P3/2pP4/8/PPP2PPP/RNBQKBNR w KQkq - 0 1";
+export const INITIAL_FEN_POSITION = "1k6/3b4/8/8/8/8/4N3/2K5 w KQkq - 0 1";
 export const INITIAL_CASTLE_PERMISSION: CastleDetails = {
     whiteKingMoved: false,
     whiteKingChecked: false,
