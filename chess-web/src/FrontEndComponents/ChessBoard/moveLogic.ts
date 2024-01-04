@@ -33,7 +33,6 @@ export function unphasantPossibility(pieceDetail: PieceDetails, chessBoard: (num
  * Updates castle permissions based on the move, capturing, and checking conditions.
  * 
  * @param {CastleDetails} castleInfo - Current castle permissions.
- * @param {Location} moveLocation - The location where the piece is moved.
  * @param {PieceDetails} currentPieceDetail - Details of the piece being moved.
  * @param {PieceDetails[]} pieceDetails - Details of all pieces on the board.
  * @param {(number | string)[]} chessBoard - The current state of the chess board.
@@ -313,7 +312,16 @@ export function verifyMovesAvailable(pieceMoveDetails: PieceDetails[], turnToMov
     return false;
 }
 
-export function verifyStalemate(pieceMoveDetails: PieceDetails[], turnToMove: string, previousFenPositions: string[], currentFenPosition: string) {
+/**
+ * Verifies if the current game state represents a stalemate for the specified player.
+ *
+ * @param pieceMoveDetails - An array of having all details of every piece.
+ * @param turnToMove - The player's turn to move, represented as a string.
+ * @param previousFenPositions - An array of previous FEN positions in the game for draw by repetation detection.
+ * @param currentFenPosition - The current FEN position in the game.
+ * @returns A boolean indicating whether the current state is a stalemate for the specified player.
+ */
+export function verifyStalemate(pieceMoveDetails: PieceDetails[], turnToMove: string, previousFenPositions: string[], currentFenPosition: string): boolean {
 
     const check = verifyCheck(pieceMoveDetails, turnToMove);
     const movesAvailable = verifyMovesAvailable(pieceMoveDetails, turnToMove);
@@ -387,7 +395,14 @@ export function verifyStalemate(pieceMoveDetails: PieceDetails[], turnToMove: st
     return false;
 }
 
-export function verifyCheckmate(pieceMoveDetails: PieceDetails[], turnToMove: string) {
+/**
+ * Verifies if the current game state represents a checkmate for the specified player.
+ *
+ * @param pieceMoveDetails - An array of having all details of every piece.
+ * @param turnToMove - The player's turn to move, represented as a string.
+ * @returns A boolean indicating whether the current state is a checkmate for the specified player.
+ */
+export function verifyCheckmate(pieceMoveDetails: PieceDetails[], turnToMove: string):boolean {
 
     const check = verifyCheck(pieceMoveDetails, turnToMove);
     const movesAvailable = verifyMovesAvailable(pieceMoveDetails, turnToMove);
@@ -403,7 +418,7 @@ export function verifyCheckmate(pieceMoveDetails: PieceDetails[], turnToMove: st
  * @param chessBoard - The current state of the chess board.
  * @param currentLocation - The current location (rank and file) of the piece.
  * @param moveLocation - The destination location (rank and file) for the piece.
- * @param moveType - The type of move ('c' for castle, 'u' for en passant, null for regular move).
+ * @param moveType - The type of move ('c' for castle and 'u' for unphasant which are some special condition, 'l' for linear).
  * @param pawnPromotedTo - The piece type to which a pawn is promoted (null if not a pawn promotion).
  * @returns string -The updated chess board position after the move.
  */
@@ -738,7 +753,6 @@ function nightMovement(color: string, boardIndex: number, chessBoardExtended: (n
         }
     }
 
-    // Return the calculated moves for the knight
     return tempMoves;
 }
 

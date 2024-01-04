@@ -2,15 +2,24 @@ import { useState } from "react";
 import Piece from "./Piece";
 import { PieceDetails, Location } from "./pieceTypes";
 import HighLightedSquare from "./HighLightedSquare";
+import PromotionOption from "./PromotionOption";
 
-export default function Board(props: { moveDetails: PieceDetails[], updatedMoves: Function, turnWisePlay: boolean, currentTurn: string}) {
-
+export default function Board(props: { moveDetails: PieceDetails[], updatedMoves: Function, turnWisePlay: boolean, currentTurn: string }) {
+    //Initial board size
     const boardSize = 600;
-    const details = props.moveDetails;
 
+    //State management for click in piece
     const [clickedPiece, setClickedPiece] = useState<null | PieceDetails>(null);
+    //State management for click detection in valid move squares
     const [currentClickedLocation, setClickedLocation] = useState<null | Location>(null);
+    //For Piece promotion information
+    const [pawnPromotionDetail, setPawnPromotionDetails] = useState<null | {
+        moveLocation: Location,
+        moveType: string,
+        pieceLocation: Location
+    }>(null);
 
+    //Highlight available moves of every piece in board
     const handlePieceClicked = (currentClicked: PieceDetails) => {
 
         if (clickedPiece === null) {
@@ -27,26 +36,41 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
         }
     }
 
-    const handlePieceMovement = (moveLocation: Location, moveType: string, piecePromoted: string | null, pieceLocation: Location) => {
+    //Move piece in board
+    const handlePieceMovement = (moveLocation: Location, moveType: string, pawnPromotion: string | null, pieceLocation: Location) => {
 
-        if (clickedPiece?.pieceName === 'p' && moveLocation.rank === 1) {
-            piecePromoted = 'q';
-        }
-        else if (clickedPiece?.pieceName === 'P' && moveLocation.rank === 8) {
-            piecePromoted = 'Q'
-        }
-        props.updatedMoves(pieceLocation, moveLocation, moveType, piecePromoted, clickedPiece);
+        props.updatedMoves(pieceLocation, moveLocation, moveType, pawnPromotion, clickedPiece);
+
+        console.log(moveLocation, moveType, pawnPromotion, pieceLocation, clickedPiece);
+        
 
         setClickedPiece(null);
-
+        setClickedLocation(null);
+        setPawnPromotionDetails(null);
     }
+
+    //If pawn promotion of any color
+    const handlePawnPromotion = (moveLocation: Location, moveType: string, pieceLocation: Location) => {
+
+        setPawnPromotionDetails({
+            moveLocation: moveLocation,
+            moveType: moveType,
+            pieceLocation: pieceLocation
+        });
+
+        console.log(moveLocation, moveType, pieceLocation);
+
+        // setClickedPiece(null);
+        setClickedLocation(null);
+    }
+
     return (
         <div
             className={`bg-no-repeat bg-fit relative`}
             style={{ backgroundImage: `url(${'/Images/brd.svg'})`, width: `${boardSize}px`, height: `${boardSize}px` }}
         >
 
-            {details.map((value, index) => {
+            {props.moveDetails.map((value, index) => {
                 return (
                     <Piece
                         details={value}
@@ -72,6 +96,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                                 rank={value.rank}
                                 color={"green"}
                                 pieceMoved={handlePieceMovement}
+                                pawnPromotion={handlePawnPromotion}
                                 moveType={"l"}
                                 pieceLocation={currentClickedLocation}
                                 pieceName={clickedPiece.pieceName}
@@ -87,6 +112,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                                 rank={value.rank}
                                 color={"red"}
                                 pieceMoved={handlePieceMovement}
+                                pawnPromotion={handlePawnPromotion}
                                 moveType={"x"}
                                 pieceLocation={currentClickedLocation}
                                 pieceName={clickedPiece.pieceName}
@@ -102,6 +128,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                                 rank={value.rank}
                                 color={"blue"}
                                 pieceMoved={handlePieceMovement}
+                                pawnPromotion={handlePawnPromotion}
                                 moveType={"u"}
                                 pieceLocation={currentClickedLocation}
                                 pieceName={clickedPiece.pieceName}
@@ -117,6 +144,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                                 rank={value.rank}
                                 color={"purple"}
                                 pieceMoved={handlePieceMovement}
+                                pawnPromotion={handlePawnPromotion}
                                 moveType={"c"}
                                 pieceLocation={currentClickedLocation}
                                 pieceName={clickedPiece.pieceName}
@@ -125,6 +153,21 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                 </>
             ) : (
                 <></>
+            )}
+
+            {pawnPromotionDetail && (
+                <PromotionOption
+                    size={boardSize / 8}
+                    promotionLocation={pawnPromotionDetail.pieceLocation}
+                    moveLocation={pawnPromotionDetail.moveLocation}
+                    moveType={pawnPromotionDetail.moveType}
+                    cancelPromo={() => {
+                        setClickedPiece(null);
+                        setClickedLocation(null);
+                        setPawnPromotionDetails(null);
+                    }}
+                    optionSelected={handlePieceMovement}
+                />
             )}
         </div>
     );

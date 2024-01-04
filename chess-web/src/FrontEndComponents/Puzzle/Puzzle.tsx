@@ -1,40 +1,65 @@
+import { useState } from "react";
+import { INITIAL_FEN_POSITION, INITIAL_CASTLE_PERMISSION } from "../ChessBoard/constants"
+import { calculateAllPossibleMoves, fillChessBoardArray, filterMoves, movePieceInBoard, unphasantPossibility, updatedCastlePermission, verifyCheck, verifyCheckmate, verifyStalemate } from "../ChessBoard/moveLogic";
+import { Location, PieceDetails } from "../ChessBoard/pieceTypes";
+import Board from "../ChessBoard/Board";
+
 export default function Puzzle(){
 
-    // const [initialFenPosition, setFenPosition] = useState<string>(INITIAL_FEN_POSITION);
 
-    // const splittedFenPos = initialFenPosition.split(" ");
-    // const chessBoardArray = fillChessBoardArray(splittedFenPos[0]);
+    //Record all previous played FEN to detect stalemate
+    const [allFenPositions, setallFenPositions] = useState([INITIAL_FEN_POSITION.split(" ")[0]]);
 
-    // const [castlePermissions, setCastlePermissions] = useState<CastleDetails>(INITIAL_CASTLE_PERMISSION);
-    // const [pieceDetails, setPieceDetails] = useState<PieceDetails[]>(calculateRawMove(chessBoardArray[1], splittedFenPos[3] , splittedFenPos[2], splittedFenPos[1]));
+    //Current FEN position and castle permission
+    const [currentFenPosition, setCurrentFenPosition] = useState(INITIAL_FEN_POSITION);
 
-    // // const check = verifyCheck(pieceDetails, splittedFenPos[1]);
-    // // const movesAvailble = verifyMovesAvailable(pieceDetails, splittedFenPos[1])
+    //Castle permission
+    let currentCastlePermission = INITIAL_CASTLE_PERMISSION;
 
-    // const handleUpdatedMoves = (pieceLocation: Location, moveLocation: Location, moveType: string, piecePromoted: string | null, currentPieceDetail: PieceDetails) => {
+    //splitted FEN position for all moves calculation
+    const splittedFenPos = currentFenPosition.split(" ");
 
-    //     const updatedPieceLocations = movePieceInBoard(chessBoardArray[0], pieceLocation, moveLocation, moveType, piecePromoted);
-    //     const nextTurn = splittedFenPos[1] === 'w' ? 'b' : 'w';
-    //     const castlePerms = updatedCastlePermission(castlePermissions, moveLocation, currentPieceDetail, pieceDetails, chessBoardArray[0]);
-    //     const unphasant = unphasantPossibility(currentPieceDetail, chessBoardArray[0], moveLocation);
+    //Find Filtered Moves for online match
+    const boardDetailsArray = fillChessBoardArray(splittedFenPos[0]);
+    const unfilteredMoves = calculateAllPossibleMoves(boardDetailsArray[1], splittedFenPos[3], splittedFenPos[2], splittedFenPos[1]);
+    const filteredMoves = filterMoves(unfilteredMoves, splittedFenPos[1], boardDetailsArray[0]);
 
-    //     const halfMove = moveType === 'x' || currentPieceDetail.pieceName === 'p' || currentPieceDetail.pieceName === 'P' ? '0' : parseInt(splittedFenPos[4]) + 1;
-    //     const fullMove = splittedFenPos[1] === 'b' ? parseInt(splittedFenPos[5]) + 1 : splittedFenPos[5];
+    //Find check, stalemate and checkmate
+    const check: boolean = verifyCheck(filteredMoves, splittedFenPos[1]);
+    const checkmate:boolean = verifyCheckmate(filteredMoves, splittedFenPos[1]);
+    const stalemate:boolean = checkmate ? false : verifyStalemate(filteredMoves, splittedFenPos[1], allFenPositions, currentFenPosition);
 
-    //     const newFenPosition = `${updatedPieceLocations} ${nextTurn} ${castlePerms} ${unphasant} ${halfMove} ${fullMove}`;
+    console.log("Check: " + check);
+    console.log("CheckMate: " + checkmate);
+    console.log("Stalemate: " + stalemate);
 
-    //     console.log(pieceLocation, moveLocation, moveType, piecePromoted, chessBoardArray[0]);
-    //     console.log(newFenPosition);
+    const handleUpdatedMoves = (pieceLocation: Location, moveLocation: Location, moveType: string, piecePromoted: string | null, currentPieceDetail: PieceDetails) => {
 
-    //     setFenPosition(newFenPosition);
-    //     setCastlePermissions(castlePermissions);
-    //     setPieceDetails(findPieceMoveDetails(newFenPosition, castlePermissions));
-    // }
+        //Generating new Fen Position
+        const updatedPieceLocations = movePieceInBoard(boardDetailsArray[0], pieceLocation, moveLocation, moveType, piecePromoted);
+        const nextTurn = splittedFenPos[1] === 'w' ? 'b' : 'w';
+        const castlePerms = updatedCastlePermission(currentCastlePermission, currentPieceDetail, filteredMoves, boardDetailsArray[0]);
+        const unphasant = unphasantPossibility(currentPieceDetail, boardDetailsArray[0], moveLocation);
+        const halfMove = moveType === 'x' || currentPieceDetail.pieceName === 'p' || currentPieceDetail.pieceName === 'P' ? '0' : parseInt(splittedFenPos[4]) + 1;
+        const fullMove = splittedFenPos[1] === 'b' ? parseInt(splittedFenPos[5]) + 1 : splittedFenPos[5];
+
+        //Set new FEN position and rerender the component
+        const tempFenPos = `${updatedPieceLocations} ${nextTurn} ${castlePerms} ${unphasant} ${halfMove} ${fullMove}`;
+        setCurrentFenPosition(tempFenPos);
+        setallFenPositions((prevFenPos) => {
+            return [...prevFenPos, tempFenPos.split(" ")[0]]
+        })
+
+        console.log(tempFenPos);
+        console.log(currentFenPosition);
+    }
 
     return (
-        <div>
-            {/* <Board moveDetails={pieceDetails} updatedMoves={handleUpdatedMoves} turnWisePlay={false} currentTurn={splittedFenPos[1]} /> */}
-            <h1>Puzzle here</h1>
-        </div>
+        <Board
+            moveDetails={unfilteredMoves}
+            updatedMoves={handleUpdatedMoves}
+            turnWisePlay={false}
+            currentTurn={splittedFenPos[1]}
+        />
     )
 }

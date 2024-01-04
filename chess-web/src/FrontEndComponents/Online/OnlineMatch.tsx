@@ -34,6 +34,9 @@ export default function OnlineMatch() {
 
     const handleUpdatedMoves = (pieceLocation: Location, moveLocation: Location, moveType: string, piecePromoted: string | null, currentPieceDetail: PieceDetails) => {
 
+        // console.log("____________");
+        // console.log(pieceLocation, moveLocation, moveType, piecePromoted, currentPieceDetail);
+        // console.log("____________");
         //Generating new Fen Position
         const updatedPieceLocations = movePieceInBoard(boardDetailsArray[0], pieceLocation, moveLocation, moveType, piecePromoted);
         const nextTurn = splittedFenPos[1] === 'w' ? 'b' : 'w';

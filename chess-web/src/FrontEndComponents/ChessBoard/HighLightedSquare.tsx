@@ -1,11 +1,13 @@
 import {Location} from './pieceTypes';
 
-const HighLightedSquare = (props: { size: number, file: number, rank: number, color: string, pieceMoved: Function, moveType: string, pieceLocation: Location | null, pieceName:string }) => {
+const HighLightedSquare = (props: { size: number, file: number, rank: number, color: string, pieceMoved: Function, pawnPromotion: Function, moveType: string, pieceLocation: Location | null, pieceName:string }) => {
 
     const topPos = (8 - props.rank) * props.size;
     const leftPos = (props.file - 1) * props.size;
 
     const dotSize = 0.3 * props.size;
+
+
 
     return (
         <div
@@ -15,14 +17,12 @@ const HighLightedSquare = (props: { size: number, file: number, rank: number, co
 
                 let piecePromoted: string | null = null;
 
-                if(props.pieceName === 'p' && props.rank === 1){
-                    piecePromoted = 'q';
+                if((props.pieceName === 'p' && props.rank === 1) || (props.pieceName === 'P' && props.rank === 8)){
+                   props.pawnPromotion({rank:props.rank, file:props.file}, props.moveType, props.pieceLocation);
                 }
-                else if(props.pieceName === 'P' && props.rank === 8){
-                    piecePromoted = 'Q';
+                else{
+                    props.pieceMoved({rank:props.rank, file:props.file}, props.moveType, piecePromoted, props.pieceLocation);
                 }
-
-                props.pieceMoved({rank:props.rank, file:props.file}, props.moveType, piecePromoted, props.pieceLocation);
             }}
         >
             <div
