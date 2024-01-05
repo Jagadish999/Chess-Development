@@ -4,7 +4,7 @@ import { PieceDetails, Location } from "./pieceTypes";
 import HighLightedSquare from "./HighLightedSquare";
 import PromotionOption from "./PromotionOption";
 
-export default function Board(props: { moveDetails: PieceDetails[], updatedMoves: Function, turnWisePlay: boolean, currentTurn: string }) {
+export default function Board(props: { moveDetails: PieceDetails[], updatedMoves: Function, turnWisePlay: boolean, currentTurn: string, gamePlayable: boolean }) {
     //Initial board size
     const boardSize = 600;
 
@@ -80,6 +80,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                         currentlyClicked={clickedPiece !== null && clickedPiece.file === value.file && clickedPiece.rank === value.rank}
                         turnWisePlay={props.turnWisePlay}
                         currentTurn={props.currentTurn}
+                        gamePlayable={props.gamePlayable}
                     />
                 )
             })}

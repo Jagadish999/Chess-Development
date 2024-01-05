@@ -62,6 +62,7 @@ export default function OnlineMatch() {
             updatedMoves={handleUpdatedMoves}
             turnWisePlay={true}
             currentTurn={splittedFenPos[1]}
+            gamePlayable={!checkmate || !stalemate}
         />
     )
 }

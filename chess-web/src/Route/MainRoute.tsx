@@ -36,7 +36,7 @@ export default function MainRoute(){
             element: <OnlineMatch></OnlineMatch>
           },
           {
-            path: "play/engine",
+            path: "play/engine/:color",
             element: <EngineMatch></EngineMatch>
           },
           {
