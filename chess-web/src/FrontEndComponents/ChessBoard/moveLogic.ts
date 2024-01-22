@@ -7,6 +7,43 @@ for multiplayer, engine, and puzzle boards based on FEN positions.
 
 import { Location, PawnDetails, PieceDetails, PieceMoves, CastleDetails } from "./pieceTypes";
 
+
+//Returns only rank and file
+export function findRankAndFileEachPiece(chessBoardExtended: (number | string)[]): PieceDetails[] {
+
+    //Piece detail holding all details of every piece to return    
+    const tempPieceDetails: PieceDetails[] = [];
+
+    //Find all details of every piece availble in board
+    for (let boardIndex = 21; boardIndex <= chessBoardExtended.length - 20; boardIndex++) {
+
+        const currentPiece = chessBoardExtended[boardIndex];
+
+        //No need to calculate if empty space found(0) or out of board reached(1)
+        if (currentPiece === 0 || currentPiece === 1) continue;
+
+        //Get rank and file of respective piece
+        const rankAndFile = findRankAndFile(boardIndex);
+        //Get color of respective piece
+        const color = currentPiece.toString().toUpperCase() === currentPiece ? "w" : "b";
+
+        let tempMoveDetails: PieceDetails = {
+            rank: rankAndFile.rank,
+            file: rankAndFile.file,
+            pieceName: currentPiece.toString(),
+            color: color,
+            linearMove: [],
+            capture: [],
+            unphasant: [],
+            castle: []
+        };
+
+        tempPieceDetails.push(tempMoveDetails);
+    }
+
+    return tempPieceDetails;
+}
+
 /**
  * Checks if an en passant move is possible for the given piece and destination.
  * 
@@ -41,10 +78,10 @@ export function unphasantPossibility(pieceDetail: PieceDetails, chessBoard: (num
 export function updatedCastlePermission(castleInfo: CastleDetails, currentPieceDetail: PieceDetails, pieceDetails: PieceDetails[], chessBoard: (number | string)[]): string {
 
     //If king or rook is moved
-    if (currentPieceDetail.pieceName === 'K') {
+    if (currentPieceDetail.pieceName === 'K' || chessBoard[4] !== 'K') {
         castleInfo.whiteKingMoved = true;
     }
-    else if (currentPieceDetail.pieceName === 'k') {
+    else if (currentPieceDetail.pieceName === 'k' || chessBoard[60] !== 'k') {
         castleInfo.blackKingMoved = true;
     }
     else if (currentPieceDetail.pieceName === 'R') {
@@ -92,6 +129,7 @@ export function updatedCastlePermission(castleInfo: CastleDetails, currentPieceD
 
         if (eachPieceDetails.color === 'b') {
 
+            //Check of king side or queen side squares are under check
             eachPieceDetails.linearMove.forEach(eachLocation => {
                 if (eachLocation.rank === 1) {
 
@@ -101,11 +139,15 @@ export function updatedCastlePermission(castleInfo: CastleDetails, currentPieceD
                     else if (eachLocation.file === 6 || eachLocation.file === 7) {
                         castleInfo.whiteKingSideSquaresChecked = true;
                     }
-                    else if (eachLocation.file === 5) {
-                        castleInfo.whiteKingChecked = true;
-                    }
                 }
 
+            });
+            eachPieceDetails.capture.forEach(eachLocation => {
+
+                if (eachLocation.rank === 1 && eachLocation.file === 5) {
+
+                        castleInfo.whiteKingChecked = true;
+                }
             });
         }
         else {
@@ -121,6 +163,12 @@ export function updatedCastlePermission(castleInfo: CastleDetails, currentPieceD
                     else if (eachLocation.file === 5) {
                         castleInfo.blackKingChecked = true;
                     }
+                }
+            });
+
+            eachPieceDetails.capture.forEach(eachLocation => {
+                if (eachLocation.rank === 8 && eachLocation.file === 5) {
+                        castleInfo.whiteKingChecked = true;
                 }
             });
         }
@@ -332,7 +380,6 @@ export function verifyStalemate(pieceMoveDetails: PieceDetails[], turnToMove: st
     //Two legel piece is only king and stalemate due to insufficient material
     if (pieceMoveDetails.length === 2) return true;
 
-    console.log(parseInt(currentFenPosition.split(" ")[4]));
     if(parseInt(currentFenPosition.split(" ")[4]) === 50) return true;
 
     //Count if position has been repeated three times:- Draw by move repetation
@@ -829,48 +876,6 @@ function checkOwnPiece(pieceColor: string, comparePiece: string): boolean {
 }
 
 /**
- * Get the rank and file numbers of an 8x8 chess board based on the provided index
- * of a 120-square extended chess board.
- *
- * @param {number} ExtendedBoardIdx - Index of the 120-square extended chess board.
- * @returns {{ rank: number, file: number }} - Object containing rank and file numbers.
- */
-function findRankAndFile(ExtendedBoardIdx: number): Location {
-
-    const rank = Math.ceil((ExtendedBoardIdx + 1) / 10);
-    const file = ExtendedBoardIdx - (rank - 1) * 10;
-
-    return { rank: rank - 2, file: file };
-}
-
-/**
- * Get the square number on an 8x8 chess board based on the provided square code.
- *
- * @param {string} squareCode - Square code in algebraic notation (e.g., 'a1', 'e5').
- * @returns {number} - Square number on the 8x8 chess board.
- */
-function locationToSqNum(squareCode: string): number {
-
-    const fileNums = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
-    const rank = parseInt(squareCode[1]);
-    const file = fileNums.indexOf(squareCode[0]) + 1;
-
-    return (rank - 1) * 8 + file;
-}
-
-/**
- * Converts rank and file coordinates to a square number on an 8x8 chess board.
- *
- * @param {number} rank - The rank (row) of the square, ranging from 1 to 8.
- * @param {number} file - The file (column) of the square, ranging from 1 to 8.
- * @returns {number} - The square number corresponding to the given rank and file.
- */
-export function fileAndRankToSq(rank: number, file: number): number {
-    return (rank - 1) * 8 + file;
-}
-
-/**
  * Fill the empty chess board array with piece positions from FEN notation.
  * Return both the extended and normal array for move calculation and generating new FEN position.
  *
@@ -919,6 +924,49 @@ export function fillChessBoardArray(pieceInfo: string): (number | string)[][] {
 }
 
 /**
+ * Get the rank and file numbers of an 8x8 chess board based on the provided index
+ * of a 120-square extended chess board.
+ *
+ * @param {number} ExtendedBoardIdx - Index of the 120-square extended chess board.
+ * @returns {{ rank: number, file: number }} - Object containing rank and file numbers.
+ */
+function findRankAndFile(ExtendedBoardIdx: number): Location {
+
+    const rank = Math.ceil((ExtendedBoardIdx + 1) / 10);
+    const file = ExtendedBoardIdx - (rank - 1) * 10;
+
+    return { rank: rank - 2, file: file };
+}
+
+/**
+ * Get the square number on an 8x8 chess board based on the provided square code.
+ *
+ * @param {string} squareCode - Square code in algebraic notation (e.g., 'a1', 'e5').
+ * @returns {number} - Square number on the 8x8 chess board.
+ */
+function locationToSqNum(squareCode: string): number {
+
+    const fileNums = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    const rank = parseInt(squareCode[1]);
+    const file = fileNums.indexOf(squareCode[0]) + 1;
+
+    return (rank - 1) * 8 + file;
+}
+
+/**
+ * Converts rank and file coordinates to a square number on an 8x8 chess board.
+ *
+ * @param {number} rank - The rank (row) of the square, ranging from 1 to 8.
+ * @param {number} file - The file (column) of the square, ranging from 1 to 8.
+ * @returns {number} - The square number corresponding to the given rank and file.
+ */
+export function fileAndRankToSq(rank: number, file: number): number {
+    return (rank - 1) * 8 + file;
+}
+
+
+/**
  * Converts the numeric rank and file indices to a string code.
  * 
  * @param rank - Numeric rank index (1 to 8).
@@ -928,4 +976,17 @@ export function fillChessBoardArray(pieceInfo: string): (number | string)[][] {
 export function fileAndRankToStrCode(rank: number, file: number): string {
     const fileNums = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     return fileNums[file - 1] + rank.toString();
+}
+
+export function sqCodeToRankAndFile(sqCode: string): Location{
+
+    const fileNums = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    const file = fileNums.indexOf(sqCode[0]) + 1;
+    const rank = parseInt(sqCode[1]);
+
+    return {
+        file: file,
+        rank: rank
+    }
 }

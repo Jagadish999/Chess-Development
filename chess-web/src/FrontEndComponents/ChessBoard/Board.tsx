@@ -3,10 +3,13 @@ import Piece from "./Piece";
 import { PieceDetails, Location } from "./pieceTypes";
 import HighLightedSquare from "./HighLightedSquare";
 import PromotionOption from "./PromotionOption";
+import TrackedSquare from "./TrackedSquare";
+import { sqCodeToRankAndFile } from "./moveLogic";
 
-export default function Board(props: { moveDetails: PieceDetails[], updatedMoves: Function, turnWisePlay: boolean, currentTurn: string, gamePlayable: boolean }) {
+export default function Board(props: { moveDetails: PieceDetails[], updatedMoves: Function, turnWisePlay: boolean, currentTurn: string, gamePlayable: boolean, previousMove: string[] | null, backAndForth: boolean }) {
+
     //Initial board size
-    const boardSize = 600;
+    const boardSize = 550;
 
     //State management for click in piece
     const [clickedPiece, setClickedPiece] = useState<null | PieceDetails>(null);
@@ -18,21 +21,63 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
         moveType: string,
         pieceLocation: Location
     }>(null);
+    // const [previousMovedSquare, setPreviousMovedSquare] = useState<null | Location[]>(null);
+
+    let previousMovedSquare: null | Location[] = props.previousMove === null ? null : [sqCodeToRankAndFile(props.previousMove[0]), sqCodeToRankAndFile(props.previousMove[1])];
+
+    if(props.backAndForth && (clickedPiece || currentClickedLocation || pawnPromotionDetail)){
+
+        if(clickedPiece) setClickedPiece(null);
+        if(currentClickedLocation) setClickedLocation(null);
+        if(pawnPromotionDetail) setPawnPromotionDetails(null);
+
+        // setPreviousMovedSquare([sqCodeToRankAndFile(props.previousMove[0]), sqCodeToRankAndFile(props.previousMove[1])]);
+    }
 
     //Highlight available moves of every piece in board
     const handlePieceClicked = (currentClicked: PieceDetails) => {
 
+        //If no piece is selected and turnwise play is
         if (clickedPiece === null) {
-            setClickedPiece(currentClicked);
-            setClickedLocation({ file: currentClicked.file, rank: currentClicked.rank });
-        }
-        else if (clickedPiece.file === currentClicked.file && clickedPiece.rank === currentClicked.rank) {
-            setClickedPiece(null);
-            setClickedLocation(null);
+
+            //If turn wise play is not required make any piece moveable
+            if (!props.turnWisePlay) {
+
+                setClickedPiece(currentClicked);
+                setClickedLocation({ file: currentClicked.file, rank: currentClicked.rank });
+            }
+            else {
+                //If turn wise game is of priority avoid piece selection for invalid pieces
+                if ((currentClicked.color === props.currentTurn)) {
+                    setClickedPiece(currentClicked);
+                    setClickedLocation({ file: currentClicked.file, rank: currentClicked.rank });
+                }
+            }
         }
         else {
-            setClickedPiece(currentClicked);
-            setClickedLocation({ file: currentClicked.file, rank: currentClicked.rank });
+
+            //If same piece is clicked twice remove piece from clicked list
+            if ((clickedPiece.file === currentClicked.file && clickedPiece.rank === currentClicked.rank)) {
+
+                setClickedPiece(null);
+                setClickedLocation(null);
+            }
+
+            //If turn wise game is not of priority let any piece to be clicked
+            else if (!props.turnWisePlay) {
+
+                setClickedPiece(currentClicked);
+                setClickedLocation({ file: currentClicked.file, rank: currentClicked.rank });
+            }
+            //If turn wise game is priority and selected a valid piece
+            else if (props.turnWisePlay && props.currentTurn === currentClicked.color) {
+                setClickedPiece(currentClicked);
+                setClickedLocation({ file: currentClicked.file, rank: currentClicked.rank });
+            }
+            else if (props.turnWisePlay && props.currentTurn !== currentClicked.color) {
+                setClickedPiece(null);
+                setClickedLocation(null);
+            }
         }
     }
 
@@ -41,12 +86,11 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
 
         props.updatedMoves(pieceLocation, moveLocation, moveType, pawnPromotion, clickedPiece);
 
-        console.log(moveLocation, moveType, pawnPromotion, pieceLocation, clickedPiece);
-        
-
         setClickedPiece(null);
         setClickedLocation(null);
         setPawnPromotionDetails(null);
+
+        // setPreviousMovedSquare([moveLocation, pieceLocation]);
     }
 
     //If pawn promotion of any color
@@ -69,7 +113,16 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
             className={`bg-no-repeat bg-fit relative`}
             style={{ backgroundImage: `url(${'/Images/brd.svg'})`, width: `${boardSize}px`, height: `${boardSize}px` }}
         >
+            <div
+                className={`absolute`}
+                style={{ width: `${boardSize}px`, height: `${boardSize}px` }}
+                onClick={
+                    () => { setClickedPiece(null) }
+                }
+            >
+            </div>
 
+            {previousMovedSquare !== null && previousMovedSquare.map((value, index) => <TrackedSquare squareLocation={value} size={boardSize / 8} key={index} />)}
             {props.moveDetails.map((value, index) => {
                 return (
                     <Piece
@@ -78,8 +131,6 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                         pieceClicked={handlePieceClicked}
                         size={boardSize / 8}
                         currentlyClicked={clickedPiece !== null && clickedPiece.file === value.file && clickedPiece.rank === value.rank}
-                        turnWisePlay={props.turnWisePlay}
-                        currentTurn={props.currentTurn}
                         gamePlayable={props.gamePlayable}
                     />
                 )
@@ -111,7 +162,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                                 size={boardSize / 8}
                                 file={value.file}
                                 rank={value.rank}
-                                color={"red"}
+                                color={"rgba(255,0,0,0.9)"}
                                 pieceMoved={handlePieceMovement}
                                 pawnPromotion={handlePawnPromotion}
                                 moveType={"x"}
@@ -170,7 +221,7 @@ export default function Board(props: { moveDetails: PieceDetails[], updatedMoves
                     optionSelected={handlePieceMovement}
                 />
             )}
+
         </div>
     );
 }
-

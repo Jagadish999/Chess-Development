@@ -1,6 +1,6 @@
 import { PieceDetails } from "./pieceTypes";
 
-export default function Piece(props: { details: PieceDetails, pieceClicked: Function, size: number, currentlyClicked: boolean, turnWisePlay: boolean, currentTurn: string, gamePlayable: boolean}) {
+export default function Piece(props: { details: PieceDetails, pieceClicked: Function, size: number, currentlyClicked: boolean, gamePlayable: boolean}) {
 
     const pieceDetail = props.details;
 
@@ -18,32 +18,15 @@ export default function Piece(props: { details: PieceDetails, pieceClicked: Func
                 src={`/Images/${pieceDetail.color}/${pieceDetail.pieceName}.png`}
                 alt="Piece Img"
                 style={{ width: `${0.9 * props.size}px`, height: `${0.9 * props.size}px` }}
-                onClick={() => {
+                onMouseDown={() => {
 
                     if(props.gamePlayable){
 
-                        if(!props.turnWisePlay){
-                        
-                            props.pieceClicked(pieceDetail);
-                            return;
-                        } 
-                        else if(pieceDetail.color === props.currentTurn && props.turnWisePlay){
-                    
-                            props.pieceClicked(pieceDetail);
-                            return;
-                        }
-    
-                        console.log("Not turn to play");
-                        return;
+                        props.pieceClicked(pieceDetail);
                     }
-
-                    console.log("Game Over");
-                    
-
                 }}
             >
             </img>
         </div>
-
     )
 }

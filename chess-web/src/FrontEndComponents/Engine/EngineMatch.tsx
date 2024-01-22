@@ -39,10 +39,6 @@ export default function EngineMatch() {
 
     const handleUpdatedMoves = (pieceLocation: Location, moveLocation: Location, moveType: string, piecePromoted: string | null, currentPieceDetail: PieceDetails) => {
 
-        // console.log("____________");
-        // console.log(pieceLocation, moveLocation, moveType, piecePromoted, currentPieceDetail);
-        // console.log("____________");
-        //Generating new Fen Position
         const updatedPieceLocations = movePieceInBoard(boardDetailsArray[0], pieceLocation, moveLocation, moveType, piecePromoted);
         const nextTurn = splittedFenPos[1] === 'w' ? 'b' : 'w';
         const castlePerms = updatedCastlePermission(currentCastlePermission, currentPieceDetail, filteredMoves, boardDetailsArray[0]);
@@ -56,16 +52,10 @@ export default function EngineMatch() {
         setallFenPositions((prevFenPos) => {
             return [...prevFenPos, tempFenPos.split(" ")[0]]
         })
-
-        console.log(tempFenPos);
-        console.log(currentFenPosition);
-
     }
     //If turn is of computer and game status is still playable
     if(color !== splittedFenPos[1] && (!checkmate && !stalemate)){
         //Make a random move here
-        console.log("Now computers turn");
-        console.log(filteredMoves);
 
         let validMovesSelected = false;
 
@@ -79,10 +69,6 @@ export default function EngineMatch() {
                 // pieceLocation: Location, moveLocation: Location, moveType: string, piecePromoted: string | null, currentPieceDetail: PieceDetails
                 const pieceLocation: Location = {rank: piece.rank, file: piece.file};
                 const moveLocation: Location = piece.linearMove[0];
-
-                console.log(piece);
-                console.log(pieceLocation);
-                console.log(moveLocation);
                 
                 handleUpdatedMoves(pieceLocation, moveLocation, 'l', null, piece);
 
@@ -99,6 +85,8 @@ export default function EngineMatch() {
             turnWisePlay={true}
             currentTurn={splittedFenPos[1]}
             gamePlayable={(!checkmate || !stalemate) && color === splittedFenPos[1]}
+            previousMove={null}
+            backAndForth={false}
         />
     )
 }

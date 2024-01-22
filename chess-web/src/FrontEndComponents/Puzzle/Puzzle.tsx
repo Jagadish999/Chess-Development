@@ -61,6 +61,8 @@ export default function Puzzle(){
             turnWisePlay={false}
             currentTurn={splittedFenPos[1]}
             gamePlayable={true}
+            previousMove={null}
+            backAndForth={false}
         />
     )
 }

@@ -2,6 +2,7 @@ import { Location } from "./pieceTypes";
 
 const PromotionOption = (props: { size: number, promotionLocation: Location, moveLocation: Location, moveType: string, cancelPromo: Function, optionSelected: Function }) => {
 
+    // console.log("Promotion Option");
     const piecePromoOpt = ['q', 'r', 'b', 'n'];
 
     // const temoTopPos = (8 - props.moveLocation.rank) * props.size;
