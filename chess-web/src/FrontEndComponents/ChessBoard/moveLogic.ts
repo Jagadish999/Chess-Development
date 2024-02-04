@@ -77,14 +77,18 @@ export function unphasantPossibility(pieceDetail: PieceDetails, chessBoard: (num
  */
 export function updatedCastlePermission(castleInfo: CastleDetails, currentPieceDetail: PieceDetails, pieceDetails: PieceDetails[], chessBoard: (number | string)[]): string {
 
+    console.log(chessBoard);
     //If king or rook is moved
     if (currentPieceDetail.pieceName === 'K' || chessBoard[4] !== 'K') {
+        
         castleInfo.whiteKingMoved = true;
     }
     else if (currentPieceDetail.pieceName === 'k' || chessBoard[60] !== 'k') {
+
         castleInfo.blackKingMoved = true;
     }
     else if (currentPieceDetail.pieceName === 'R') {
+        
         if (currentPieceDetail.rank === 1 && currentPieceDetail.file === 8) {
             castleInfo.whiteKingSideRookMoved = true;
         }
