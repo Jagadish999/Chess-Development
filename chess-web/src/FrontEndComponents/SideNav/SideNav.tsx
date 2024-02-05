@@ -3,6 +3,8 @@ import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 
 import { Link } from "react-router-dom";
 
@@ -26,6 +28,16 @@ const NAV_LINKS = [
         title: "Puzzle",
         icon: <ExtensionIcon />,
         redirect: "/puzzle"
+    },
+    {
+        title: "LogIn",
+        icon: <LoginIcon />,
+        redirect: "/login-form"
+    },
+    {
+        title: "Register",
+        icon: <AppRegistrationIcon />,
+        redirect: "/register-form"
     },
     {
         title: "LogOut",
